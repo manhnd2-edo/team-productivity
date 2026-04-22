@@ -83,7 +83,7 @@
     <div id="sec-task" class="section active">
       <div class="row">
         <input id="task-title" placeholder="Tên công việc..." onkeydown="if(event.key==='Enter')addTask()" style="flex:2;min-width:160px"/>
-        <select id="task-member" style="flex:1;min-width:110px">
+        <select id="task-member" multiple style="flex:1;min-width:110px;height:72px;border-radius:8px">
           <option>Edo</option><option>Bean</option><option>Vinh</option><option>Thái Hưng</option><option>Tâm</option><option>Hà</option>
         </select>
         <select id="task-priority" style="flex:1;min-width:100px">
@@ -228,7 +228,9 @@ function setupRealtime() {
 // ── TASKS ──
 async function addTask() {
   const title=document.getElementById('task-title').value.trim(); if(!title)return;
-  const task={id:uid(),title,member:document.getElementById('task-member').value,
+  const members=Array.from(document.getElementById('task-member').selectedOptions).map(o=>o.value);
+  if(!members.length){alert('Chọn ít nhất 1 người!');return;}
+  const task={id:uid(),title,member:members[0],members,
     priority:document.getElementById('task-priority').value,
     deadline:document.getElementById('task-deadline').value||null,
     deadline_time:document.getElementById('task-deadline-time').value||null,
@@ -265,7 +267,7 @@ function renderTasks(){
       <div style="flex:1;min-width:0">
         <div class="task-title${t.done?' done':''}">${t.title}</div>
         <div class="task-meta">
-          <span class="badge" style="background:#8b5cf633;color:#8b5cf6;border:1px solid #8b5cf655">${t.member}</span>
+          <span class="badge" style="background:#8b5cf633;color:#8b5cf6;border:1px solid #8b5cf655">${(t.members&&t.members.length?t.members:t.member?[t.member]:[]).join(', ')}</span>
           <span class="badge" style="background:${pc}33;color:${pc};border:1px solid ${pc}55">${t.priority}</span>
           ${t.deadline?`<span style="font-size:11px;color:${overdue?'#ef4444':'#64748b'}">📅 ${t.deadline}${t.deadline_time?' '+t.deadline_time:''}${overdue?' ⚠️':''}</span>`:''}
         </div>
