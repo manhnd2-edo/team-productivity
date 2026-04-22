@@ -20,8 +20,7 @@
     .section{display:none}.section.active{display:block}
     input,select,textarea{background:#1e1e2e;border:1px solid #333;border-radius:8px;padding:8px 12px;color:#e2e8f0;outline:none;width:100%;font-size:14px;font-family:inherit}
     textarea{resize:vertical}
-    .row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px}
-    .row input,.row select{flex:1;min-width:100px}
+    .row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;align-items:center}
     .btn{border-radius:8px;padding:8px 16px;font-size:14px;font-weight:600;cursor:pointer;border:none;background:#6366f1;color:#fff}
     .btn-ghost{background:transparent;color:#94a3b8;border:1px solid #333}
     .badge{border-radius:99px;padding:1px 8px;font-size:11px;font-weight:600}
@@ -33,10 +32,7 @@
     .filter-btn.active{background:#6366f1;color:#fff}
     .filter-btn.active-yellow{background:#f59e0b;color:#fff}
     .task-item{background:#1e1e2e;border-radius:10px;padding:10px 14px;display:flex;align-items:center;gap:10px;margin-bottom:8px}
-    .task-title{font-weight:600;font-size:14px;color:#e2e8f0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-    .task-title.done{text-decoration:line-through;color:#555}
-    .task-meta{display:flex;gap:6px;margin-top:4px;flex-wrap:wrap;align-items:center}
-    .icon-btn{background:none;border:none;cursor:pointer;padding:4px}
+    .icon-btn{background:none;border:none;cursor:pointer;padding:4px;line-height:0}
     .empty{color:#4a4a6a;text-align:center;padding:32px}
     table{width:100%;border-collapse:collapse;min-width:520px}
     .habit-table-wrap{overflow-x:auto}
@@ -57,6 +53,21 @@
     .note-footer{display:flex;justify-content:space-between;align-items:center;margin-top:4px}
     #alert-banner{display:none;background:#ef444422;border:1px solid #ef444444;color:#ef4444;border-radius:10px;padding:10px 14px;margin-bottom:14px;font-size:13px;font-weight:600}
     #sync-status{position:fixed;bottom:16px;right:16px;background:#1e1e2e;border:1px solid #333;border-radius:8px;padding:6px 12px;font-size:12px;color:#64748b;display:none}
+    /* Modal */
+    .modal-overlay{display:none;position:fixed;inset:0;background:#000a;z-index:1000;align-items:center;justify-content:center}
+    .modal-overlay.open{display:flex}
+    .modal{background:#1a1a2e;border-radius:14px;padding:20px;width:90%;max-width:480px;display:flex;flex-direction:column;gap:12px}
+    .modal h3{font-size:16px;font-weight:700;color:#e2e8f0}
+    .modal label{font-size:12px;color:#64748b;margin-bottom:4px;display:block}
+    /* Member dropdown */
+    .member-dd-wrap{position:relative;flex:1;min-width:160px}
+    .member-dd-trigger{background:#1e1e2e;border:1px solid #333;border-radius:8px;padding:8px 12px;cursor:pointer;font-size:14px;color:#e2e8f0;height:38px;display:flex;align-items:center;justify-content:space-between;gap:6px;user-select:none}
+    .member-dd-list{display:none;position:absolute;top:42px;left:0;width:200px;background:#1e1e2e;border:1px solid #444;border-radius:8px;z-index:999;box-shadow:0 4px 20px #0008;padding:4px 0}
+    .member-dd-list.open{display:block}
+    .member-dd-list label{display:flex;flex-direction:row;align-items:center;padding:8px 16px;cursor:pointer;gap:12px;white-space:nowrap}
+    .member-dd-list label:hover{background:#2d2d3f}
+    .member-dd-list input[type=checkbox]{width:16px;height:16px;flex-shrink:0;margin:0;accent-color:#6366f1}
+    .member-dd-list span{font-size:14px;line-height:1}
   </style>
 </head>
 <body>
@@ -82,27 +93,27 @@
     <!-- TASK -->
     <div id="sec-task" class="section active">
       <div class="row">
-        <input id="task-title" placeholder="Tên công việc..." onkeydown="if(event.key==='Enter')addTask()" style="flex:2;min-width:160px"/>
-        <div style="position:relative;flex:1;min-width:160px" id="member-dropdown-wrap">
-          <div id="member-dropdown-trigger" onclick="toggleMemberDropdown()" style="background:#1e1e2e;border:1px solid #333;border-radius:8px;padding:8px 12px;cursor:pointer;font-size:14px;color:#e2e8f0;min-height:38px;display:flex;align-items:center;justify-content:space-between;gap:6px;user-select:none">
+        <input id="task-title" placeholder="Tên công việc..." onkeydown="if(event.key==='Enter')addTask()" style="flex:2;min-width:150px"/>
+        <div class="member-dd-wrap" id="member-dropdown-wrap">
+          <div class="member-dd-trigger" onclick="toggleMemberDropdown('member-dd')">
             <span id="member-dropdown-label" style="color:#64748b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Chọn thành viên...</span>
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0"><path d="M6 9l6 6 6-6"/></svg>
           </div>
-          <div id="member-dropdown-list" style="display:none;position:absolute;top:42px;left:0;width:200px;background:#1e1e2e;border:1px solid #444;border-radius:8px;z-index:999;box-shadow:0 4px 20px #0008;padding:4px 0">
-            <label style="display:flex;flex-direction:row;align-items:center;padding:8px 16px;cursor:pointer;gap:12px" onmouseover="this.style.background='#2d2d3f'" onmouseout="this.style.background='transparent'"><input type="checkbox" value="Edo" onchange="updateMemberLabel()" style="accent-color:#6366f1;width:16px;height:16px;flex-shrink:0;margin:0"/><span style="font-size:14px;line-height:1">Edo</span></label>
-            <label style="display:flex;flex-direction:row;align-items:center;padding:8px 16px;cursor:pointer;gap:12px" onmouseover="this.style.background='#2d2d3f'" onmouseout="this.style.background='transparent'"><input type="checkbox" value="Bean" onchange="updateMemberLabel()" style="accent-color:#6366f1;width:16px;height:16px;flex-shrink:0;margin:0"/><span style="font-size:14px;line-height:1">Bean</span></label>
-            <label style="display:flex;flex-direction:row;align-items:center;padding:8px 16px;cursor:pointer;gap:12px" onmouseover="this.style.background='#2d2d3f'" onmouseout="this.style.background='transparent'"><input type="checkbox" value="Vinh" onchange="updateMemberLabel()" style="accent-color:#6366f1;width:16px;height:16px;flex-shrink:0;margin:0"/><span style="font-size:14px;line-height:1">Vinh</span></label>
-            <label style="display:flex;flex-direction:row;align-items:center;padding:8px 16px;cursor:pointer;gap:12px" onmouseover="this.style.background='#2d2d3f'" onmouseout="this.style.background='transparent'"><input type="checkbox" value="Thái Hưng" onchange="updateMemberLabel()" style="accent-color:#6366f1;width:16px;height:16px;flex-shrink:0;margin:0"/><span style="font-size:14px;line-height:1">Thái Hưng</span></label>
-            <label style="display:flex;flex-direction:row;align-items:center;padding:8px 16px;cursor:pointer;gap:12px" onmouseover="this.style.background='#2d2d3f'" onmouseout="this.style.background='transparent'"><input type="checkbox" value="Tâm" onchange="updateMemberLabel()" style="accent-color:#6366f1;width:16px;height:16px;flex-shrink:0;margin:0"/><span style="font-size:14px;line-height:1">Tâm</span></label>
-            <label style="display:flex;flex-direction:row;align-items:center;padding:8px 16px;cursor:pointer;gap:12px" onmouseover="this.style.background='#2d2d3f'" onmouseout="this.style.background='transparent'"><input type="checkbox" value="Hà" onchange="updateMemberLabel()" style="accent-color:#6366f1;width:16px;height:16px;flex-shrink:0;margin:0"/><span style="font-size:14px;line-height:1">Hà</span></label>
+          <div class="member-dd-list" id="member-dd">
+            <label><input type="checkbox" value="Edo" onchange="updateMemberLabel('member-dd','member-dropdown-label')"/><span>Edo</span></label>
+            <label><input type="checkbox" value="Bean" onchange="updateMemberLabel('member-dd','member-dropdown-label')"/><span>Bean</span></label>
+            <label><input type="checkbox" value="Vinh" onchange="updateMemberLabel('member-dd','member-dropdown-label')"/><span>Vinh</span></label>
+            <label><input type="checkbox" value="Thái Hưng" onchange="updateMemberLabel('member-dd','member-dropdown-label')"/><span>Thái Hưng</span></label>
+            <label><input type="checkbox" value="Tâm" onchange="updateMemberLabel('member-dd','member-dropdown-label')"/><span>Tâm</span></label>
+            <label><input type="checkbox" value="Hà" onchange="updateMemberLabel('member-dd','member-dropdown-label')"/><span>Hà</span></label>
           </div>
         </div>
-        <select id="task-priority" style="flex:1;min-width:100px">
+        <select id="task-priority" style="flex:1;min-width:110px">
           <option>Cao</option><option selected>Trung bình</option><option>Thấp</option>
         </select>
-        <input id="task-deadline" type="date" style="flex:1;min-width:120px"/>
+        <input id="task-deadline" type="date" style="flex:1;min-width:130px"/>
         <input id="task-deadline-time" type="time" style="flex:1;min-width:100px"/>
-        <button class="btn" onclick="addTask()">＋</button>
+        <button class="btn" onclick="addTask()" style="flex-shrink:0">＋</button>
       </div>
       <div class="progress-bar-wrap">
         <div style="display:flex;justify-content:space-between;font-size:13px;color:#94a3b8;margin-bottom:6px">
@@ -164,146 +175,260 @@
     </div>
   </div>
 </div>
+
+<!-- EDIT TASK MODAL -->
+<div class="modal-overlay" id="edit-modal">
+  <div class="modal">
+    <h3>✏️ Chỉnh sửa công việc</h3>
+    <div>
+      <label>Tên công việc</label>
+      <input id="edit-title" placeholder="Tên công việc..."/>
+    </div>
+    <div>
+      <label>Thành viên</label>
+      <div class="member-dd-wrap" style="width:100%">
+        <div class="member-dd-trigger" onclick="toggleMemberDropdown('edit-member-dd')" style="width:100%">
+          <span id="edit-member-label" style="color:#64748b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Chọn thành viên...</span>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0"><path d="M6 9l6 6 6-6"/></svg>
+        </div>
+        <div class="member-dd-list" id="edit-member-dd" style="width:100%">
+          <label><input type="checkbox" value="Edo" onchange="updateMemberLabel('edit-member-dd','edit-member-label')"/><span>Edo</span></label>
+          <label><input type="checkbox" value="Bean" onchange="updateMemberLabel('edit-member-dd','edit-member-label')"/><span>Bean</span></label>
+          <label><input type="checkbox" value="Vinh" onchange="updateMemberLabel('edit-member-dd','edit-member-label')"/><span>Vinh</span></label>
+          <label><input type="checkbox" value="Thái Hưng" onchange="updateMemberLabel('edit-member-dd','edit-member-label')"/><span>Thái Hưng</span></label>
+          <label><input type="checkbox" value="Tâm" onchange="updateMemberLabel('edit-member-dd','edit-member-label')"/><span>Tâm</span></label>
+          <label><input type="checkbox" value="Hà" onchange="updateMemberLabel('edit-member-dd','edit-member-label')"/><span>Hà</span></label>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px">
+      <div style="flex:1">
+        <label>Độ ưu tiên</label>
+        <select id="edit-priority"><option>Cao</option><option>Trung bình</option><option>Thấp</option></select>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px">
+      <div style="flex:1"><label>Ngày deadline</label><input id="edit-deadline" type="date"/></div>
+      <div style="flex:1"><label>Giờ deadline</label><input id="edit-deadline-time" type="time"/></div>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:4px">
+      <button class="btn" onclick="saveEditTask()" style="flex:1">💾 Lưu</button>
+      <button class="btn btn-ghost" onclick="closeEditModal()">Hủy</button>
+    </div>
+  </div>
+</div>
+
 <div id="sync-status">🔄 Đang đồng bộ...</div>
 
 <script>
-// ── SUPABASE ──
-const SUPA_URL = 'https://oucbjnysbkocljmvhbst.supabase.co';
-const SUPA_KEY = 'sb_publishable_o_DZw6kAIt_pSlYQp4xRNw_0pvdVKz0';
-const sb = supabase.createClient(SUPA_URL, SUPA_KEY);
+const SUPA_URL='https://oucbjnysbkocljmvhbst.supabase.co';
+const SUPA_KEY='sb_publishable_o_DZw6kAIt_pSlYQp4xRNw_0pvdVKz0';
+const sb=supabase.createClient(SUPA_URL,SUPA_KEY);
 
-const uid = () => Math.random().toString(36).slice(2,9);
-const today = () => new Date().toISOString().slice(0,10);
-const PRIO_COLOR = {Cao:'#ef4444','Trung bình':'#f59e0b',Thấp:'#10b981'};
-let state = {tasks:[],habits:[],sessions:[],notes:[]};
-let taskFilterMember = 'Tất cả';
+const uid=()=>Math.random().toString(36).slice(2,9);
+const today=()=>new Date().toISOString().slice(0,10);
+const PRIO_COLOR={Cao:'#ef4444','Trung bình':'#f59e0b',Thấp:'#10b981'};
+let state={tasks:[],habits:[],sessions:[],notes:[]};
+let taskFilterMember='Tất cả';
+let editingTaskId=null;
 
-function showSync() {
-  const el = document.getElementById('sync-status');
-  el.style.display='block'; clearTimeout(showSync._t);
-  showSync._t = setTimeout(()=>el.style.display='none', 1500);
+// ── SYNC STATUS ──
+function showSync(){
+  const el=document.getElementById('sync-status');
+  el.style.display='block';clearTimeout(showSync._t);
+  showSync._t=setTimeout(()=>el.style.display='none',1500);
 }
 
 // ── TABS ──
-function switchTab(id,el) {
+function switchTab(id,el){
   document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
   document.getElementById('sec-'+id).classList.add('active');
   el.classList.add('active');
 }
 
+// ── MEMBER DROPDOWN ──
+function toggleMemberDropdown(ddId){
+  const dd=document.getElementById(ddId);
+  dd.classList.toggle('open');
+}
+function updateMemberLabel(ddId,labelId){
+  const checked=Array.from(document.querySelectorAll('#'+ddId+' input:checked')).map(o=>o.value);
+  const label=document.getElementById(labelId);
+  if(checked.length){label.style.color='#e2e8f0';label.textContent=checked.join(', ');}
+  else{label.style.color='#64748b';label.textContent='Chọn thành viên...';}
+}
+function getCheckedMembers(ddId){
+  return Array.from(document.querySelectorAll('#'+ddId+' input:checked')).map(o=>o.value);
+}
+function setCheckedMembers(ddId,labelId,members){
+  document.querySelectorAll('#'+ddId+' input').forEach(i=>i.checked=members.includes(i.value));
+  updateMemberLabel(ddId,labelId);
+}
+document.addEventListener('click',e=>{
+  document.querySelectorAll('.member-dd-list.open').forEach(dd=>{
+    if(!dd.closest('.member-dd-wrap').contains(e.target)) dd.classList.remove('open');
+  });
+  // close modal if click overlay
+  if(e.target.id==='edit-modal') closeEditModal();
+});
+
 // ── ALERT ──
-function checkDeadlines() {
-  const tom = new Date(); tom.setDate(tom.getDate()+1);
-  const tomStr = tom.toISOString().slice(0,10);
-  const urgent = state.tasks.filter(t=>!t.done&&t.deadline&&t.deadline<=tomStr);
-  const b = document.getElementById('alert-banner');
-  if(urgent.length){b.style.display='block';b.innerHTML=`⚠️ ${urgent.length} công việc sắp hết hạn: ${urgent.map(t=>`<b>${t.title}</b> (${t.deadline})`).join(', ')}`;}
+function checkDeadlines(){
+  const tom=new Date();tom.setDate(tom.getDate()+1);
+  const tomStr=tom.toISOString().slice(0,10);
+  const urgent=state.tasks.filter(t=>!t.done&&t.deadline&&t.deadline<=tomStr);
+  const b=document.getElementById('alert-banner');
+  if(urgent.length){b.style.display='block';b.innerHTML=`⚠️ ${urgent.length} công việc sắp hết hạn: ${urgent.map(t=>`<b>${t.title}</b> (${t.deadline}${t.deadline_time?' '+t.deadline_time:''})`).join(', ')}`;}
   else b.style.display='none';
 }
 
 // ── LOAD ──
-async function loadAll() {
-  const [t,h,s,n] = await Promise.all([
+async function loadAll(){
+  const [t,h,s,n]=await Promise.all([
     sb.from('tasks').select('*').order('created',{ascending:false}),
     sb.from('habits').select('*'),
     sb.from('pomodoro_sessions').select('*').order('date',{ascending:false}),
     sb.from('notes').select('*').order('updated',{ascending:false}),
   ]);
-  state.tasks=t.data||[]; state.habits=h.data||[]; state.sessions=s.data||[]; state.notes=n.data||[];
-  renderTasks(); renderHabits(); renderSessions(); renderNotes(); checkDeadlines();
+  state.tasks=t.data||[];state.habits=h.data||[];state.sessions=s.data||[];state.notes=n.data||[];
+  renderTasks();renderHabits();renderSessions();renderNotes();checkDeadlines();
 }
 
 // ── REALTIME ──
-function setupRealtime() {
+function setupRealtime(){
   sb.channel('db-changes')
     .on('postgres_changes',{event:'*',schema:'public',table:'tasks'},async()=>{
-      showSync(); const {data}=await sb.from('tasks').select('*').order('created',{ascending:false});
-      state.tasks=data||[]; renderTasks(); checkDeadlines();
+      showSync();const {data}=await sb.from('tasks').select('*').order('created',{ascending:false});
+      state.tasks=data||[];renderTasks();checkDeadlines();
     })
     .on('postgres_changes',{event:'*',schema:'public',table:'habits'},async()=>{
-      showSync(); const {data}=await sb.from('habits').select('*');
-      state.habits=data||[]; renderHabits();
+      showSync();const {data}=await sb.from('habits').select('*');
+      state.habits=data||[];renderHabits();
     })
     .on('postgres_changes',{event:'*',schema:'public',table:'pomodoro_sessions'},async()=>{
-      showSync(); const {data}=await sb.from('pomodoro_sessions').select('*').order('date',{ascending:false});
-      state.sessions=data||[]; renderSessions();
+      showSync();const {data}=await sb.from('pomodoro_sessions').select('*').order('date',{ascending:false});
+      state.sessions=data||[];renderSessions();
     })
     .on('postgres_changes',{event:'*',schema:'public',table:'notes'},async()=>{
-      showSync(); const {data}=await sb.from('notes').select('*').order('updated',{ascending:false});
-      state.notes=data||[]; renderNotes();
+      showSync();const {data}=await sb.from('notes').select('*').order('updated',{ascending:false});
+      state.notes=data||[];renderNotes();
     })
     .subscribe();
 }
 
 // ── TASKS ──
-async function addTask() {
-  const title=document.getElementById('task-title').value.trim(); if(!title)return;
-  const members=Array.from(document.querySelectorAll('#member-dropdown-list input:checked')).map(o=>o.value);
+async function addTask(){
+  const title=document.getElementById('task-title').value.trim();if(!title)return;
+  const members=getCheckedMembers('member-dd');
   if(!members.length){alert('Chọn ít nhất 1 người!');return;}
-  const task={id:uid(),title,member:members[0],members,
+  await sb.from('tasks').insert({
+    id:uid(),title,member:members[0],members,
     priority:document.getElementById('task-priority').value,
     deadline:document.getElementById('task-deadline').value||null,
     deadline_time:document.getElementById('task-deadline-time').value||null,
-    done:false,created:today()};
-  await sb.from('tasks').insert(task);
+    done:false,created:today()
+  });
   document.getElementById('task-title').value='';
   document.getElementById('task-deadline').value='';
-  document.querySelectorAll('#member-dropdown-list input').forEach(i=>i.checked=false);
-  updateMemberLabel();
+  document.getElementById('task-deadline-time').value='';
+  setCheckedMembers('member-dd','member-dropdown-label',[]);
 }
+
 async function toggleTask(id){
-  const t=state.tasks.find(x=>x.id===id); if(!t)return;
-  t.done=!t.done; // optimistic update
-  renderTasks();
+  const t=state.tasks.find(x=>x.id===id);if(!t)return;
+  t.done=!t.done;renderTasks();
   await sb.from('tasks').update({done:t.done}).eq('id',id);
 }
-async function deleteTask(id){ await sb.from('tasks').delete().eq('id',id); }
+
+async function deleteTask(id){await sb.from('tasks').delete().eq('id',id);}
+
+function openEditModal(id){
+  const t=state.tasks.find(x=>x.id===id);if(!t)return;
+  editingTaskId=id;
+  document.getElementById('edit-title').value=t.title;
+  document.getElementById('edit-priority').value=t.priority||'Trung bình';
+  document.getElementById('edit-deadline').value=t.deadline||'';
+  document.getElementById('edit-deadline-time').value=t.deadline_time||'';
+  setCheckedMembers('edit-member-dd','edit-member-label',t.members||[t.member]||[]);
+  document.getElementById('edit-modal').classList.add('open');
+}
+
+function closeEditModal(){
+  document.getElementById('edit-modal').classList.remove('open');
+  editingTaskId=null;
+}
+
+async function saveEditTask(){
+  if(!editingTaskId)return;
+  const members=getCheckedMembers('edit-member-dd');
+  if(!members.length){alert('Chọn ít nhất 1 người!');return;}
+  await sb.from('tasks').update({
+    title:document.getElementById('edit-title').value.trim(),
+    members,member:members[0],
+    priority:document.getElementById('edit-priority').value,
+    deadline:document.getElementById('edit-deadline').value||null,
+    deadline_time:document.getElementById('edit-deadline-time').value||null,
+  }).eq('id',editingTaskId);
+  closeEditModal();
+}
+
+function setMemberFilter(m){taskFilterMember=m;renderTasks();}
 
 function renderTasks(){
-  const shown=state.tasks.filter(t=>taskFilterMember==='Tất cả'||t.member===taskFilterMember);
+  // filter: nếu chọn thành viên, hiện task có thành viên đó trong mảng members
+  const shown=state.tasks.filter(t=>{
+    if(taskFilterMember==='Tất cả')return true;
+    const members=t.members&&t.members.length?t.members:[t.member];
+    return members.includes(taskFilterMember);
+  });
   const done=shown.filter(t=>t.done).length;
   document.getElementById('task-progress-label').textContent=`${done}/${shown.length} hoàn thành`;
   document.getElementById('task-progress-fill').style.width=shown.length?`${(done/shown.length)*100}%`:'0%';
+
   const members=['Tất cả','Edo','Bean','Vinh','Thái Hưng','Tâm','Hà'];
   document.getElementById('task-member-filters').innerHTML=members.map(m=>
     `<button class="filter-btn${taskFilterMember===m?' active-yellow':''}" onclick="setMemberFilter('${m}')">${m}</button>`
   ).join('');
+
   const list=document.getElementById('task-list');
   if(!shown.length){list.innerHTML='<div class="empty">Chưa có công việc nào</div>';return;}
   list.innerHTML=shown.map(t=>{
     const overdue=t.deadline&&t.deadline<today()&&!t.done;
     const pc=PRIO_COLOR[t.priority]||'#6366f1';
+    const memberList=(t.members&&t.members.length?t.members:[t.member]).join(', ');
     return `<div class="task-item" style="border-left:3px solid ${pc};opacity:${t.done?.5:1}">
-      <input type="checkbox" ${t.done?'checked':''} onchange="toggleTask('${t.id}')" style="accent-color:#6366f1;width:16px;height:16px;cursor:pointer"/>
+      <input type="checkbox" ${t.done?'checked':''} onchange="toggleTask('${t.id}')" style="accent-color:#6366f1;width:16px;height:16px;cursor:pointer;flex-shrink:0"/>
       <div style="flex:1;min-width:0">
-        <div class="task-title${t.done?' done':''}">${t.title}</div>
-        <div class="task-meta">
-          <span class="badge" style="background:#8b5cf633;color:#8b5cf6;border:1px solid #8b5cf655">${(t.members&&t.members.length?t.members:t.member?[t.member]:[]).join(', ')}</span>
+        <div style="font-weight:600;font-size:14px;color:${t.done?'#555':'#e2e8f0'};text-decoration:${t.done?'line-through':'none'};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${t.title}</div>
+        <div style="display:flex;gap:6px;margin-top:4px;flex-wrap:wrap;align-items:center">
+          <span class="badge" style="background:#8b5cf633;color:#8b5cf6;border:1px solid #8b5cf655">${memberList}</span>
           <span class="badge" style="background:${pc}33;color:${pc};border:1px solid ${pc}55">${t.priority}</span>
           ${t.deadline?`<span style="font-size:11px;color:${overdue?'#ef4444':'#64748b'}">📅 ${t.deadline}${t.deadline_time?' '+t.deadline_time:''}${overdue?' ⚠️':''}</span>`:''}
         </div>
       </div>
+      <button class="icon-btn" onclick="openEditModal('${t.id}')" style="color:#6366f1;opacity:.8">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+      </button>
       <button class="icon-btn" onclick="deleteTask('${t.id}')" style="color:#ef4444;opacity:.6">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg>
-      </button></div>`;
+      </button>
+    </div>`;
   }).join('');
 }
-function setMemberFilter(m){taskFilterMember=m;renderTasks();}
 
 // ── HABITS ──
 async function addHabit(){
-  const name=document.getElementById('habit-name').value.trim(); if(!name)return;
+  const name=document.getElementById('habit-name').value.trim();if(!name)return;
   await sb.from('habits').insert({id:uid(),name,logs:[]});
   document.getElementById('habit-name').value='';
 }
 async function toggleHabit(hid,date){
-  const h=state.habits.find(x=>x.id===hid); if(!h)return;
-  const logs=h.logs.includes(date)?h.logs.filter(d=>d!==date):[...h.logs,date];
+  const h=state.habits.find(x=>x.id===hid);if(!h)return;
+  const logs=h.logs&&h.logs.includes(date)?h.logs.filter(d=>d!==date):[...(h.logs||[]),date];
   await sb.from('habits').update({logs}).eq('id',hid);
 }
 async function deleteHabit(id){await sb.from('habits').delete().eq('id',id);}
-
 function streak(h){
   let s=0;const d=new Date();
   while(true){const ds=new Date(d).toISOString().slice(0,10);if(h.logs&&h.logs.includes(ds)){s++;d.setDate(d.getDate()-1);}else break;}
@@ -326,7 +451,7 @@ function renderHabits(){
         ${done?'<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>':''}
       </button></td>`;}).join('')}
     <td style="text-align:center;font-size:13px;font-weight:700;color:#f59e0b">${streak(h)}</td>
-    <td style="text-align:center"><button class="icon-btn" onclick="deleteHabit('${h.id}')" style="color:#ef4444;opacity:.6">
+    <td><button class="icon-btn" onclick="deleteHabit('${h.id}')" style="color:#ef4444;opacity:.6">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg>
     </button></td>
   </tr>`).join('')}</tbody></table>`;
@@ -335,7 +460,6 @@ function renderHabits(){
 // ── POMODORO ──
 const WORK=25*60,BREAK=5*60;
 let pomoSecs=WORK,pomoRunning=false,pomoMode='work',pomoInterval=null;
-
 function setMode(m){
   pomoMode=m;pomoSecs=m==='work'?WORK:BREAK;pomoRunning=false;clearInterval(pomoInterval);
   document.getElementById('btn-work').className='pomo-mode-btn'+(m==='work'?' active-work':'');
@@ -356,7 +480,7 @@ function togglePomo(){
         if(pomoMode==='work'){
           const task=document.getElementById('pomo-task').value||'Không có tiêu đề';
           await sb.from('pomodoro_sessions').insert({id:uid(),task,date:today(),time:new Date().toLocaleTimeString('vi-VN',{hour:'2-digit',minute:'2-digit'})});
-          if('Notification' in window&&Notification.permission==='granted')
+          if('Notification'in window&&Notification.permission==='granted')
             new Notification('🍅 Hết giờ!',{body:'Hoàn thành 1 pomodoro. Nghỉ ngơi đi!'});
           setMode('break');
         }else setMode('work');
@@ -379,12 +503,12 @@ function renderSessions(){
     `<div class="session-item"><span style="color:#e2e8f0">${s.task}</span><span style="color:#64748b">${s.date} ${s.time}</span></div>`
   ).join('')||(state.sessions.length===0?'<div class="empty" style="padding:16px;font-size:13px">Chưa có phiên nào</div>':'');
 }
-if('Notification' in window&&Notification.permission==='default')Notification.requestPermission();
+if('Notification'in window&&Notification.permission==='default')Notification.requestPermission();
 
 // ── NOTES ──
 let editingNoteId=null;
 async function saveNote(){
-  const title=document.getElementById('note-title').value.trim(); if(!title)return;
+  const title=document.getElementById('note-title').value.trim();if(!title)return;
   const body=document.getElementById('note-body').value,tag=document.getElementById('note-tag').value.trim();
   if(editingNoteId){
     await sb.from('notes').update({title,body,tag,updated:today()}).eq('id',editingNoteId);
@@ -399,7 +523,7 @@ async function saveNote(){
   document.getElementById('note-tag').value='';
 }
 function editNote(id){
-  const n=state.notes.find(x=>x.id===id); if(!n)return;
+  const n=state.notes.find(x=>x.id===id);if(!n)return;
   document.getElementById('note-title').value=n.title;
   document.getElementById('note-body').value=n.body||'';
   document.getElementById('note-tag').value=n.tag||'';
@@ -409,9 +533,7 @@ function editNote(id){
 }
 function cancelNote(){
   editingNoteId=null;
-  document.getElementById('note-title').value='';
-  document.getElementById('note-body').value='';
-  document.getElementById('note-tag').value='';
+  ['note-title','note-body','note-tag'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('note-save-btn').textContent='➕ Thêm ghi chú';
   document.getElementById('note-cancel-btn').style.display='none';
 }
@@ -441,20 +563,6 @@ function renderNotes(){
   </div>`).join('');
 }
 
-function toggleMemberDropdown(){
-  const list=document.getElementById('member-dropdown-list');
-  list.style.display=list.style.display==='none'?'block':'none';
-}
-function updateMemberLabel(){
-  const checked=Array.from(document.querySelectorAll('#member-dropdown-list input:checked')).map(o=>o.value);
-  const label=document.getElementById('member-dropdown-label');
-  if(checked.length){label.style.color='#e2e8f0';label.textContent=checked.join(', ');}
-  else{label.style.color='#64748b';label.textContent='Chọn thành viên...';}
-}
-document.addEventListener('click',e=>{
-  const wrap=document.getElementById('member-dropdown-wrap');
-  if(wrap&&!wrap.contains(e.target)) document.getElementById('member-dropdown-list').style.display='none';
-});
 // ── INIT ──
 loadAll();
 setupRealtime();
