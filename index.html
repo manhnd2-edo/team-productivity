@@ -235,7 +235,9 @@ async function addTask() {
 }
 async function toggleTask(id){
   const t=state.tasks.find(x=>x.id===id); if(!t)return;
-  await sb.from('tasks').update({done:!t.done}).eq('id',id);
+  t.done=!t.done; // optimistic update
+  renderTasks();
+  await sb.from('tasks').update({done:t.done}).eq('id',id);
 }
 async function deleteTask(id){ await sb.from('tasks').delete().eq('id',id); }
 
