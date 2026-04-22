@@ -83,9 +83,19 @@
     <div id="sec-task" class="section active">
       <div class="row">
         <input id="task-title" placeholder="Tên công việc..." onkeydown="if(event.key==='Enter')addTask()" style="flex:2;min-width:160px"/>
-        <select id="task-member" multiple style="flex:1;min-width:110px;height:72px;border-radius:8px">
-          <option>Edo</option><option>Bean</option><option>Vinh</option><option>Thái Hưng</option><option>Tâm</option><option>Hà</option>
-        </select>
+        <div style="position:relative;flex:1;min-width:130px" id="member-dropdown-wrap">
+          <div id="member-dropdown-trigger" onclick="toggleMemberDropdown()" style="background:#1e1e2e;border:1px solid #333;border-radius:8px;padding:8px 12px;cursor:pointer;font-size:14px;color:#e2e8f0;min-height:38px;display:flex;align-items:center;justify-content:space-between;gap:6px;user-select:none">
+            <span id="member-dropdown-label" style="color:#64748b">Chọn thành viên...</span>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+          </div>
+          <div id="member-dropdown-list" style="display:none;position:absolute;top:42px;left:0;right:0;background:#1e1e2e;border:1px solid #444;border-radius:8px;z-index:100;overflow:hidden;box-shadow:0 4px 20px #0008">
+            ${['Edo','Bean','Vinh','Thái Hưng','Tâm','Hà'].map(m=>`
+            <label style="display:flex;align-items:center;gap:10px;padding:8px 14px;cursor:pointer;transition:background .15s" onmouseover="this.style.background='#2d2d3f'" onmouseout="this.style.background='transparent'">
+              <input type="checkbox" value="${m}" onchange="updateMemberLabel()" style="accent-color:#6366f1;width:15px;height:15px;cursor:pointer"/>
+              <span style="font-size:14px">${m}</span>
+            </label>`).join('')}
+          </div>
+        </div>
         <select id="task-priority" style="flex:1;min-width:100px">
           <option>Cao</option><option selected>Trung bình</option><option>Thấp</option>
         </select>
@@ -228,7 +238,7 @@ function setupRealtime() {
 // ── TASKS ──
 async function addTask() {
   const title=document.getElementById('task-title').value.trim(); if(!title)return;
-  const members=Array.from(document.getElementById('task-member').selectedOptions).map(o=>o.value);
+  const members=Array.from(document.querySelectorAll('#member-dropdown-list input:checked')).map(o=>o.value);
   if(!members.length){alert('Chọn ít nhất 1 người!');return;}
   const task={id:uid(),title,member:members[0],members,
     priority:document.getElementById('task-priority').value,
@@ -238,7 +248,8 @@ async function addTask() {
   await sb.from('tasks').insert(task);
   document.getElementById('task-title').value='';
   document.getElementById('task-deadline').value='';
-  document.getElementById('task-deadline-time').value='';
+  document.querySelectorAll('#member-dropdown-list input').forEach(i=>i.checked=false);
+  updateMemberLabel();
 }
 async function toggleTask(id){
   const t=state.tasks.find(x=>x.id===id); if(!t)return;
@@ -429,6 +440,20 @@ function renderNotes(){
   </div>`).join('');
 }
 
+function toggleMemberDropdown(){
+  const list=document.getElementById('member-dropdown-list');
+  list.style.display=list.style.display==='none'?'block':'none';
+}
+function updateMemberLabel(){
+  const checked=Array.from(document.querySelectorAll('#member-dropdown-list input:checked')).map(o=>o.value);
+  const label=document.getElementById('member-dropdown-label');
+  if(checked.length){label.style.color='#e2e8f0';label.textContent=checked.join(', ');}
+  else{label.style.color='#64748b';label.textContent='Chọn thành viên...';}
+}
+document.addEventListener('click',e=>{
+  const wrap=document.getElementById('member-dropdown-wrap');
+  if(wrap&&!wrap.contains(e.target)) document.getElementById('member-dropdown-list').style.display='none';
+});
 // ── INIT ──
 loadAll();
 setupRealtime();
