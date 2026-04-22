@@ -89,11 +89,12 @@
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
           </div>
           <div id="member-dropdown-list" style="display:none;position:absolute;top:42px;left:0;right:0;background:#1e1e2e;border:1px solid #444;border-radius:8px;z-index:100;overflow:hidden;box-shadow:0 4px 20px #0008">
-            ${['Edo','Bean','Vinh','Thái Hưng','Tâm','Hà'].map(m=>`
-            <label style="display:flex;align-items:center;gap:10px;padding:8px 14px;cursor:pointer;transition:background .15s" onmouseover="this.style.background='#2d2d3f'" onmouseout="this.style.background='transparent'">
-              <input type="checkbox" value="${m}" onchange="updateMemberLabel()" style="accent-color:#6366f1;width:15px;height:15px;cursor:pointer"/>
-              <span style="font-size:14px">${m}</span>
-            </label>`).join('')}
+            <label style="display:flex;align-items:center;gap:10px;padding:8px 14px;cursor:pointer" onmouseover="this.style.background='#2d2d3f'" onmouseout="this.style.background='transparent'"><input type="checkbox" value="Edo" onchange="updateMemberLabel()" style="accent-color:#6366f1;width:15px;height:15px"/><span>Edo</span></label>
+            <label style="display:flex;align-items:center;gap:10px;padding:8px 14px;cursor:pointer" onmouseover="this.style.background='#2d2d3f'" onmouseout="this.style.background='transparent'"><input type="checkbox" value="Bean" onchange="updateMemberLabel()" style="accent-color:#6366f1;width:15px;height:15px"/><span>Bean</span></label>
+            <label style="display:flex;align-items:center;gap:10px;padding:8px 14px;cursor:pointer" onmouseover="this.style.background='#2d2d3f'" onmouseout="this.style.background='transparent'"><input type="checkbox" value="Vinh" onchange="updateMemberLabel()" style="accent-color:#6366f1;width:15px;height:15px"/><span>Vinh</span></label>
+            <label style="display:flex;align-items:center;gap:10px;padding:8px 14px;cursor:pointer" onmouseover="this.style.background='#2d2d3f'" onmouseout="this.style.background='transparent'"><input type="checkbox" value="Thái Hưng" onchange="updateMemberLabel()" style="accent-color:#6366f1;width:15px;height:15px"/><span>Thái Hưng</span></label>
+            <label style="display:flex;align-items:center;gap:10px;padding:8px 14px;cursor:pointer" onmouseover="this.style.background='#2d2d3f'" onmouseout="this.style.background='transparent'"><input type="checkbox" value="Tâm" onchange="updateMemberLabel()" style="accent-color:#6366f1;width:15px;height:15px"/><span>Tâm</span></label>
+            <label style="display:flex;align-items:center;gap:10px;padding:8px 14px;cursor:pointer" onmouseover="this.style.background='#2d2d3f'" onmouseout="this.style.background='transparent'"><input type="checkbox" value="Hà" onchange="updateMemberLabel()" style="accent-color:#6366f1;width:15px;height:15px"/><span>Hà</span></label>
           </div>
         </div>
         <select id="task-priority" style="flex:1;min-width:100px">
