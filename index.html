@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Năng Suất Nhóm</title>
+  <meta name="theme-color" content="#0f0f1a" />
+  <link rel="manifest" href="manifest.json" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #0f0f1a; color: #e2e8f0; font-family: system-ui, sans-serif; min-height: 100vh; }
+    .app { max-width: 800px; margin: 0 auto; padding: 20px 16px; }
+    h1 { font-size: 22px; font-weight: 800; background: linear-gradient(135deg,#6366f1,#8b5cf6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .subtitle { color: #4a4a6a; font-size: 13px; margin-top: 4px; margin-bottom: 20px; }
+    .tabs { display: flex; gap: 6px; background: #1a1a2e; border-radius: 12px; padding: 6px; margin-bottom: 20px; }
+    .tab { flex: 1; padding: 8px 4px; border-radius: 8px; border: none; cursor: pointer; font-weight: 600; font-size: 12px; background: transparent; color: #64748b; transition: all .2s; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+    .tab.active { background: #6366f1; color: #fff; }
+    .panel { background: #13131f; border-radius: 14px; padding: 16px; min-height: 400px; }
+    .section { display: none; }
+    .section.active { display: block; }
+    input, select, textarea { background: #1e1e2e; border: 1px solid #333; border-radius: 8px; padding: 8px 12px; color: #e2e8f0; outline: none; width: 100%; font-size: 14px; font-family: inherit; }
+    textarea { resize: vertical; }
+    .row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 8px; }
+    .row input, .row select { flex: 1; min-width: 100px; }
+    .btn { border-radius: 8px; padding: 8px 16px; font-size: 14px; font-weight: 600; cursor: pointer; border: none; background: #6366f1; color: #fff; }
+    .btn-ghost { background: transparent; color: #94a3b8; border: 1px solid #333; }
+    .btn-danger { background: #ef444422; color: #ef4444; border: 1px solid #ef444444; }
+    .badge { border-radius: 99px; padding: 1px 8px; font-size: 11px; font-weight: 600; }
+    .progress-bar-wrap { background: #1e1e2e; border-radius: 10px; padding: 10px 14px; margin-bottom: 14px; }
+    .progress-bar-bg { background: #2d2d3f; border-radius: 99px; height: 8px; }
+    .progress-bar-fill { background: #6366f1; height: 8px; border-radius: 99px; transition: width .4s; }
+    .filter-row { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
+    .filter-btn { border-radius: 99px; padding: 4px 12px; font-size: 12px; font-weight: 600; border: none; cursor: pointer; background: #2d2d3f; color: #94a3b8; }
+    .filter-btn.active { background: #6366f1; color: #fff; }
+    .filter-btn.active-yellow { background: #f59e0b; color: #fff; }
+    .task-item { background: #1e1e2e; border-radius: 10px; padding: 10px 14px; display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+    .task-title { font-weight: 600; font-size: 14px; color: #e2e8f0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .task-title.done { text-decoration: line-through; color: #555; }
+    .task-meta { display: flex; gap: 6px; margin-top: 4px; flex-wrap: wrap; align-items: center; }
+    .icon-btn { background: none; border: none; cursor: pointer; padding: 4px; }
+    .empty { color: #4a4a6a; text-align: center; padding: 32px; }
+    /* Habit */
+    table { width: 100%; border-collapse: collapse; min-width: 520px; }
+    .habit-table-wrap { overflow-x: auto; }
+    th { text-align: left; padding: 4px 8px; color: #64748b; font-size: 12px; }
+    td { padding: 8px 4px; border-top: 1px solid #222; }
+    .habit-cell { width: 22px; height: 22px; border-radius: 4px; border: none; cursor: pointer; background: #2d2d3f; transition: background .15s; display: flex; align-items: center; justify-content: center; margin: 0 auto; }
+    .habit-cell.done { background: #6366f1; }
+    /* Pomodoro */
+    .pomo-center { display: flex; flex-direction: column; align-items: center; gap: 16px; }
+    .pomo-mode-row { display: flex; gap: 8px; justify-content: center; margin-bottom: 20px; }
+    .pomo-mode-btn { border-radius: 99px; padding: 6px 18px; font-weight: 600; font-size: 13px; border: none; cursor: pointer; background: #2d2d3f; color: #94a3b8; }
+    .pomo-mode-btn.active-work { background: #6366f1; color: #fff; }
+    .pomo-mode-btn.active-break { background: #10b981; color: #fff; }
+    .pomo-btn-row { display: flex; gap: 10px; }
+    .pomo-start { min-width: 100px; }
+    .session-item { background: #1e1e2e; border-radius: 8px; padding: 8px 12px; margin-bottom: 6px; display: flex; justify-content: space-between; font-size: 13px; }
+    /* Notes */
+    .note-form { background: #1e1e2e; border-radius: 12px; padding: 14px; margin-bottom: 16px; }
+    .notes-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; }
+    .note-card { background: #1e1e2e; border-radius: 10px; padding: 12px; display: flex; flex-direction: column; gap: 6px; }
+    .note-title { font-weight: 700; font-size: 14px; color: #e2e8f0; }
+    .note-body { font-size: 13px; color: #94a3b8; white-space: pre-wrap; max-height: 80px; overflow: hidden; }
+    .note-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 4px; }
+    .note-date { font-size: 10px; color: #4a4a6a; }
+    /* Notification banner */
+    #alert-banner { display: none; background: #ef444422; border: 1px solid #ef444444; color: #ef4444; border-radius: 10px; padding: 10px 14px; margin-bottom: 14px; font-size: 13px; font-weight: 600; }
+  </style>
+</head>
+<body>
+<div class="app">
+  <h1>🚀 Năng Suất Nhóm</h1>
+  <p class="subtitle">Quản lý công việc, thói quen, thời gian và ghi chú</p>
+
+  <div id="alert-banner"></div>
+
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('task',this)">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+      Công Việc
+    </button>
+    <button class="tab" onclick="switchTab('habit',this)">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a10 10 0 100 20A10 10 0 0012 2zm0 6v4l3 3"/></svg>
+      Thói Quen
+    </button>
+    <button class="tab" onclick="switchTab('timer',this)">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10zm0-14v4l2.5 2.5"/></svg>
+      Pomodoro
+    </button>
+    <button class="tab" onclick="switchTab('note',this)">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8zM14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg>
+      Ghi Chú
+    </button>
+  </div>
+
+  <div class="panel">
+    <!-- TASK -->
+    <div id="sec-task" class="section active">
+      <div class="row" style="margin-bottom:8px">
+        <input id="task-title" placeholder="Tên công việc..." onkeydown="if(event.key==='Enter')addTask()" style="flex:2;min-width:160px"/>
+        <select id="task-member" style="flex:1;min-width:110px">
+          <option>Edo</option><option>Bean</option><option>Vinh</option><option>Thái Hưng</option><option>Tâm</option><option>Hà</option>
+        </select>
+        <select id="task-priority" style="flex:1;min-width:110px">
+          <option>Cao</option><option selected>Trung bình</option><option>Thấp</option>
+        </select>
+        <input id="task-deadline" type="date" style="flex:1;min-width:130px"/>
+        <button class="btn" onclick="addTask()">＋</button>
+      </div>
+      <div class="progress-bar-wrap">
+        <div style="display:flex;justify-content:space-between;font-size:13px;color:#94a3b8;margin-bottom:6px">
+          <span>Tiến độ</span><span id="task-progress-label">0/0 hoàn thành</span>
+        </div>
+        <div class="progress-bar-bg"><div id="task-progress-fill" class="progress-bar-fill" style="width:0%"></div></div>
+      </div>
+      <div class="filter-row" id="task-member-filters"></div>
+      <div id="task-list"></div>
+    </div>
+
+    <!-- HABIT -->
+    <div id="sec-habit" class="section">
+      <div class="row" style="margin-bottom:16px">
+        <input id="habit-name" placeholder="Tên thói quen..." onkeydown="if(event.key==='Enter')addHabit()" style="flex:2;min-width:160px"/>
+        <button class="btn" onclick="addHabit()">＋</button>
+      </div>
+      <div class="habit-table-wrap"><div id="habit-table"></div></div>
+    </div>
+
+    <!-- POMODORO -->
+    <div id="sec-timer" class="section">
+      <div class="pomo-mode-row">
+        <button class="pomo-mode-btn active-work" id="btn-work" onclick="setMode('work')">🍅 Làm việc</button>
+        <button class="pomo-mode-btn" id="btn-break" onclick="setMode('break')">☕ Nghỉ ngơi</button>
+      </div>
+      <div class="pomo-center">
+        <svg id="pomo-svg" width="180" height="180">
+          <circle cx="90" cy="90" r="70" fill="none" stroke="#2d2d3f" stroke-width="10"/>
+          <circle id="pomo-arc" cx="90" cy="90" r="70" fill="none" stroke="#6366f1" stroke-width="10"
+            stroke-dasharray="439.82" stroke-dashoffset="439.82" stroke-linecap="round"
+            style="transform:rotate(-90deg);transform-origin:90px 90px;transition:stroke-dashoffset .5s"/>
+          <text id="pomo-time" x="90" y="98" text-anchor="middle" fill="#e2e8f0" font-size="28" font-weight="700" font-family="monospace">25:00</text>
+        </svg>
+        <input id="pomo-task" placeholder="Đang làm việc gì?" style="max-width:280px;text-align:center"/>
+        <div class="pomo-btn-row">
+          <button class="btn pomo-start" id="pomo-start-btn" onclick="togglePomo()">▶ Bắt đầu</button>
+          <button class="btn btn-ghost" onclick="resetPomo()">↺ Reset</button>
+        </div>
+        <div style="width:100%;max-width:400px">
+          <div style="color:#64748b;font-size:13px;margin-bottom:8px" id="pomo-session-label">📋 Lịch sử phiên (0 phiên)</div>
+          <div id="pomo-sessions"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- NOTES -->
+    <div id="sec-note" class="section">
+      <div class="note-form">
+        <div class="row">
+          <input id="note-title" placeholder="Tiêu đề ghi chú..." style="flex:2;min-width:150px"/>
+          <input id="note-tag" placeholder="Tag..." style="flex:1;min-width:90px"/>
+        </div>
+        <textarea id="note-body" placeholder="Nội dung ghi chú..." rows="3" style="margin-bottom:8px"></textarea>
+        <div style="display:flex;gap:8px">
+          <button class="btn" id="note-save-btn" onclick="saveNote()" style="flex:1">➕ Thêm ghi chú</button>
+          <button class="btn btn-ghost" id="note-cancel-btn" onclick="cancelNote()" style="display:none">Hủy</button>
+        </div>
+      </div>
+      <div class="row" style="margin-bottom:12px">
+        <input id="note-search" placeholder="🔍 Tìm kiếm..." oninput="renderNotes()"/>
+      </div>
+      <div id="notes-grid" class="notes-grid"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── UTILS ──
+const uid = () => Math.random().toString(36).slice(2,9);
+const today = () => new Date().toISOString().slice(0,10);
+const save = (k,v) => localStorage.setItem(k, JSON.stringify(v));
+const load = (k, def) => { try { const s=localStorage.getItem(k); return s?JSON.parse(s):def; } catch { return def; } };
+const CAT_COLOR = "#6366f1";
+const PRIO_COLOR = { Cao:"#ef4444", "Trung bình":"#f59e0b", Thấp:"#10b981" };
+
+// ── TABS ──
+function switchTab(id, el) {
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('sec-'+id).classList.add('active');
+  el.classList.add('active');
+}
+
+// ── ALERT BANNER ──
+function checkDeadlines() {
+  const tasks = load('tasks',[]);
+  const tom = new Date(); tom.setDate(tom.getDate()+1);
+  const tomStr = tom.toISOString().slice(0,10);
+  const urgent = tasks.filter(t => !t.done && t.deadline && (t.deadline <= tomStr));
+  const banner = document.getElementById('alert-banner');
+  if (urgent.length) {
+    banner.style.display = 'block';
+    banner.innerHTML = `⚠️ Có ${urgent.length} công việc sắp hết hạn: ${urgent.map(t=>`<b>${t.title}</b> (${t.deadline})`).join(', ')}`;
+  } else banner.style.display = 'none';
+}
+
+// ── TASKS ──
+let taskFilterMember = 'Tất cả';
+
+function addTask() {
+  const title = document.getElementById('task-title').value.trim();
+  if (!title) return;
+  const tasks = load('tasks',[]);
+  tasks.unshift({
+    id: uid(), title,
+    member: document.getElementById('task-member').value,
+    priority: document.getElementById('task-priority').value,
+    deadline: document.getElementById('task-deadline').value,
+    done: false, created: today()
+  });
+  save('tasks', tasks);
+  document.getElementById('task-title').value = '';
+  document.getElementById('task-deadline').value = '';
+  renderTasks(); checkDeadlines();
+}
+
+function toggleTask(id) {
+  const tasks = load('tasks',[]);
+  const t = tasks.find(x=>x.id===id); if(t) t.done=!t.done;
+  save('tasks',tasks); renderTasks(); checkDeadlines();
+}
+
+function deleteTask(id) {
+  save('tasks', load('tasks',[]).filter(x=>x.id!==id));
+  renderTasks(); checkDeadlines();
+}
+
+function renderTasks() {
+  const tasks = load('tasks',[]);
+  const shown = tasks.filter(t => taskFilterMember==='Tất cả' || t.member===taskFilterMember);
+  const done = shown.filter(t=>t.done).length;
+
+  document.getElementById('task-progress-label').textContent = `${done}/${shown.length} hoàn thành`;
+  document.getElementById('task-progress-fill').style.width = shown.length ? `${(done/shown.length)*100}%` : '0%';
+
+  // Member filters
+  const members = ['Tất cả','Edo','Bean','Vinh','Thái Hưng','Tâm','Hà'];
+  const fr = document.getElementById('task-member-filters');
+  fr.innerHTML = members.map(m => `<button class="filter-btn${taskFilterMember===m?' active-yellow':''}" onclick="setMemberFilter('${m}')">${m}</button>`).join('');
+
+  const list = document.getElementById('task-list');
+  if (!shown.length) { list.innerHTML = '<div class="empty">Chưa có công việc nào</div>'; return; }
+  list.innerHTML = shown.map(t => {
+    const overdue = t.deadline && t.deadline < today() && !t.done;
+    const pc = PRIO_COLOR[t.priority] || '#6366f1';
+    return `<div class="task-item" style="border-left:3px solid ${pc};opacity:${t.done?.5:1}">
+      <input type="checkbox" ${t.done?'checked':''} onchange="toggleTask('${t.id}')" style="accent-color:#6366f1;width:16px;height:16px;cursor:pointer"/>
+      <div style="flex:1;min-width:0">
+        <div class="task-title ${t.done?'done':''}">${t.title}</div>
+        <div class="task-meta">
+          <span class="badge" style="background:#6366f133;color:#6366f1;border:1px solid #6366f155">Công việc</span>
+          <span class="badge" style="background:#8b5cf633;color:#8b5cf6;border:1px solid #8b5cf655">${t.member}</span>
+          <span class="badge" style="background:${pc}33;color:${pc};border:1px solid ${pc}55">${t.priority}</span>
+          ${t.deadline?`<span style="font-size:11px;color:${overdue?'#ef4444':'#64748b'}">📅 ${t.deadline}${overdue?' ⚠️':''}</span>`:''}
+        </div>
+      </div>
+      <button class="icon-btn" onclick="deleteTask('${t.id}')" style="color:#ef4444;opacity:.6">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg>
+      </button>
+    </div>`;
+  }).join('');
+}
+
+function setMemberFilter(m) { taskFilterMember=m; renderTasks(); }
+
+// ── HABITS ──
+function addHabit() {
+  const name = document.getElementById('habit-name').value.trim();
+  if (!name) return;
+  const habits = load('habits',[]);
+  habits.unshift({ id:uid(), name, logs:[] });
+  save('habits',habits);
+  document.getElementById('habit-name').value='';
+  renderHabits();
+}
+
+function toggleHabit(hid, date) {
+  const habits = load('habits',[]);
+  const h = habits.find(x=>x.id===hid);
+  if(h) h.logs = h.logs.includes(date) ? h.logs.filter(d=>d!==date) : [...h.logs, date];
+  save('habits',habits); renderHabits();
+}
+
+function deleteHabit(id) { save('habits',load('habits',[]).filter(x=>x.id!==id)); renderHabits(); }
+
+function streak(h) {
+  let s=0; const d=new Date();
+  while(true){ const ds=new Date(d).toISOString().slice(0,10); if(h.logs.includes(ds)){s++;d.setDate(d.getDate()-1);}else break; }
+  return s;
+}
+
+function renderHabits() {
+  const habits = load('habits',[]);
+  const last14 = Array.from({length:14},(_,i)=>{ const d=new Date(); d.setDate(d.getDate()-13+i); return d.toISOString().slice(0,10); });
+  const days = ['CN','T2','T3','T4','T5','T6','T7'];
+  const wrap = document.getElementById('habit-table');
+  if (!habits.length) { wrap.innerHTML='<div class="empty">Chưa có thói quen nào</div>'; return; }
+  wrap.innerHTML = `<table>
+    <thead><tr>
+      <th style="width:180px">Thói quen</th>
+      ${last14.map(d=>`<th style="text-align:center;font-size:10px;width:28px">${d.slice(8)}<br><span style="font-size:9px">${days[new Date(d).getDay()]}</span></th>`).join('')}
+      <th style="width:50px;text-align:center">🔥</th><th style="width:30px"></th>
+    </tr></thead>
+    <tbody>${habits.map(h=>`<tr>
+      <td><div style="font-weight:600;color:#e2e8f0;font-size:13px">${h.name}</div></td>
+      ${last14.map(d=>{
+        const done=h.logs.includes(d);
+        return `<td style="text-align:center"><button class="habit-cell ${done?'done':''}" onclick="toggleHabit('${h.id}','${d}')">
+          ${done?'<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>':''}
+        </button></td>`;
+      }).join('')}
+      <td style="text-align:center;font-size:13px;font-weight:700;color:#f59e0b">${streak(h)}</td>
+      <td style="text-align:center"><button class="icon-btn" onclick="deleteHabit('${h.id}')" style="color:#ef4444;opacity:.6">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg>
+      </button></td>
+    </tr>`).join('')}</tbody>
+  </table>`;
+}
+
+// ── POMODORO ──
+const WORK=25*60, BREAK=5*60;
+let pomoSecs=WORK, pomoRunning=false, pomoMode='work', pomoInterval=null;
+
+function setMode(m) {
+  pomoMode=m; pomoSecs=m==='work'?WORK:BREAK; pomoRunning=false;
+  clearInterval(pomoInterval);
+  document.getElementById('btn-work').className='pomo-mode-btn'+(m==='work'?' active-work':'');
+  document.getElementById('btn-break').className='pomo-mode-btn'+(m==='break'?' active-break':'');
+  document.getElementById('pomo-arc').style.stroke=m==='work'?'#6366f1':'#10b981';
+  document.getElementById('pomo-start-btn').style.background=m==='work'?'#6366f1':'#10b981';
+  updatePomoDisplay();
+}
+
+function togglePomo() {
+  pomoRunning=!pomoRunning;
+  document.getElementById('pomo-start-btn').textContent=pomoRunning?'⏸ Dừng':'▶ Bắt đầu';
+  if(pomoRunning){
+    pomoInterval=setInterval(()=>{
+      pomoSecs--;
+      if(pomoSecs<=0){
+        clearInterval(pomoInterval); pomoRunning=false;
+        if(pomoMode==='work'){
+          const sessions=load('pomodoro_sessions',[]);
+          const task=document.getElementById('pomo-task').value||'Không có tiêu đề';
+          sessions.unshift({id:uid(),task,date:today(),time:new Date().toLocaleTimeString('vi-VN',{hour:'2-digit',minute:'2-digit'})});
+          save('pomodoro_sessions',sessions);
+          renderSessions();
+          new Notification&&Notification.permission==='granted'&&new Notification('🍅 Hết giờ!',{body:'Đã hoàn thành 1 pomodoro. Nghỉ ngơi đi!'});
+          setMode('break');
+        } else setMode('work');
+        return;
+      }
+      updatePomoDisplay();
+    },1000);
+  } else clearInterval(pomoInterval);
+}
+
+function resetPomo() { pomoRunning=false; clearInterval(pomoInterval); pomoSecs=pomoMode==='work'?WORK:BREAK; document.getElementById('pomo-start-btn').textContent='▶ Bắt đầu'; updatePomoDisplay(); }
+
+function updatePomoDisplay() {
+  const mm=String(Math.floor(pomoSecs/60)).padStart(2,'0');
+  const ss=String(pomoSecs%60).padStart(2,'0');
+  document.getElementById('pomo-time').textContent=`${mm}:${ss}`;
+  const total=pomoMode==='work'?WORK:BREAK;
+  const circ=2*Math.PI*70;
+  document.getElementById('pomo-arc').style.strokeDashoffset=circ-(circ*((total-pomoSecs)/total));
+}
+
+function renderSessions() {
+  const sessions=load('pomodoro_sessions',[]);
+  document.getElementById('pomo-session-label').textContent=`📋 Lịch sử phiên (${sessions.length} phiên)`;
+  document.getElementById('pomo-sessions').innerHTML=sessions.slice(0,8).map(s=>`
+    <div class="session-item"><span style="color:#e2e8f0">${s.task}</span><span style="color:#64748b">${s.date} ${s.time}</span></div>
+  `).join('')||(sessions.length===0?'<div class="empty" style="padding:16px;font-size:13px">Chưa có phiên nào</div>':'');
+}
+
+// Request notification permission
+if('Notification' in window && Notification.permission==='default') Notification.requestPermission();
+
+// ── NOTES ──
+let editingNoteId = null;
+
+function saveNote() {
+  const title=document.getElementById('note-title').value.trim();
+  if(!title) return;
+  const notes=load('notes',[]);
+  const body=document.getElementById('note-body').value;
+  const tag=document.getElementById('note-tag').value.trim();
+  if(editingNoteId){
+    const n=notes.find(x=>x.id===editingNoteId);
+    if(n){n.title=title;n.body=body;n.tag=tag;n.updated=today();}
+    editingNoteId=null;
+    document.getElementById('note-save-btn').textContent='➕ Thêm ghi chú';
+    document.getElementById('note-cancel-btn').style.display='none';
+  } else {
+    notes.unshift({id:uid(),title,body,tag,created:today(),updated:today()});
+  }
+  save('notes',notes);
+  document.getElementById('note-title').value='';
+  document.getElementById('note-body').value='';
+  document.getElementById('note-tag').value='';
+  renderNotes();
+}
+
+function editNote(id) {
+  const n=load('notes',[]).find(x=>x.id===id); if(!n)return;
+  document.getElementById('note-title').value=n.title;
+  document.getElementById('note-body').value=n.body;
+  document.getElementById('note-tag').value=n.tag||'';
+  editingNoteId=id;
+  document.getElementById('note-save-btn').textContent='💾 Cập nhật';
+  document.getElementById('note-cancel-btn').style.display='';
+}
+
+function cancelNote() {
+  editingNoteId=null;
+  document.getElementById('note-title').value='';
+  document.getElementById('note-body').value='';
+  document.getElementById('note-tag').value='';
+  document.getElementById('note-save-btn').textContent='➕ Thêm ghi chú';
+  document.getElementById('note-cancel-btn').style.display='none';
+}
+
+function deleteNote(id) { save('notes',load('notes',[]).filter(x=>x.id!==id)); renderNotes(); }
+
+function renderNotes() {
+  const notes=load('notes',[]);
+  const q=document.getElementById('note-search').value.toLowerCase();
+  const shown=notes.filter(n=>n.title.toLowerCase().includes(q)||n.body.toLowerCase().includes(q)||(n.tag||'').toLowerCase().includes(q));
+  const grid=document.getElementById('notes-grid');
+  if(!shown.length){grid.innerHTML='<div class="empty" style="grid-column:1/-1">Chưa có ghi chú nào</div>';return;}
+  grid.innerHTML=shown.map(n=>`<div class="note-card" style="border-top:3px solid #6366f1">
+    <div class="note-title">${n.title}</div>
+    ${n.body?`<div class="note-body">${n.body}</div>`:''}
+    <div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:4px">
+      <span class="badge" style="background:#6366f133;color:#6366f1;border:1px solid #6366f155">Công việc</span>
+      ${n.tag?`<span class="badge" style="background:#8b5cf633;color:#8b5cf6;border:1px solid #8b5cf655">#${n.tag}</span>`:''}
+    </div>
+    <div class="note-footer">
+      <span class="note-date">${n.updated}</span>
+      <div style="display:flex;gap:6px">
+        <button class="icon-btn" onclick="editNote('${n.id}')" style="color:#6366f1;opacity:.8">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        </button>
+        <button class="icon-btn" onclick="deleteNote('${n.id}')" style="color:#ef4444;opacity:.6">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>`).join('');
+}
+
+// ── INIT ──
+renderTasks(); renderHabits(); renderSessions(); renderNotes(); checkDeadlines();
+setInterval(checkDeadlines, 60000);
+</script>
+</body>
+</html>
